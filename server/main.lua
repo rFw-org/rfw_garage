@@ -38,7 +38,6 @@ AddEventHandler("rFw:SendVehToGarage", function(props, plate, net)
         ['@plate'] = plate 
     })
 
-    print(info[1])
     if info[1] == nil then
         MySQL.Async.execute("INSERT INTO `players_veh` (`owner`, `owned`, `plate`, `stored`, `props`) VALUES ('"..license.."', '0', '"..plate.."', '1', '"..encodedProps.."')", {}, function()end)
         playerVehCache[license][#playerVehCache[license] + 1] = {props = props, owned = 0, stored = 1, mileage = 0.0}
@@ -46,13 +45,22 @@ AddEventHandler("rFw:SendVehToGarage", function(props, plate, net)
         TriggerClientEvent("rFw:GetPlayerVehicles", source, playerVehCache[license])
     elseif info[1].owned == 1 then
         -- Do an props update, compare encoded props in cache with new props
+
         for k,v in pairs(playerVehCache[license]) do
             if v.props.plate == plate then
                 playerVehCache[license][k].stored = 1
+                if encodedProps ~= json.encode(v.props) then
+                    MySQL.Async.execute("UPDATE `players_veh` SET props = '"..encodedProps.."' WHERE plate = '"..plate.."'", {}, function()end)
+                    playerVehCache[license][k].props = props
+                    print("^2GARAGE: ^7Updating props for "..plate.."")
+                end
+                break
             end
         end
         Citizen.InvokeNative(`DELETE_ENTITY` & 0xFFFFFFFF, NetworkGetEntityFromNetworkId(net))
         TriggerClientEvent("rFw:GetPlayerVehicles", source, playerVehCache[license])
+    else
+        TriggerClientEvent("rFw:CantEnterVeh", source)
     end
 end)
 

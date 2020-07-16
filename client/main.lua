@@ -34,6 +34,11 @@ AddEventHandler("rFw:GetPlayerVehicles", function(vehs)
     vehicles = vehs
 end)
 
+RegisterNetEvent("rFw:CantEnterVeh")
+AddEventHandler("rFw:CantEnterVeh", function()
+    ShowNotification("Sorry, this vehicle can't be stored.")
+end)
+
 RMenu.Add('garage', 'main', RageUI.CreateMenu("Garage", ""))
 RMenu:Get('garage', 'main'):SetSubtitle("~b~Garage action menu")
 RMenu:Get('garage', 'main').EnableMouse = false
